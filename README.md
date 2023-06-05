@@ -19,14 +19,13 @@ Here are some ideas to get you started:
 
 <p align="left"> <img src="https://komarev.com/ghpvc/?username=kikidwi&label=Profile%20views&color=0e75b6&style=flat" alt="kikidwi" /> </p>
 
-<p align="left"> <a href="https://github.com/ryo-ma/github-profile-trophy"><img src="https://github-profile-trophy.vercel.app/?username=kikidwi" alt="kikidwi" /></a> </p>
-
 - 🌱 I’m currently learning **Android Development**
 
 - 📫 How to reach me **kikidprasetyo29@gmail.com**
 
 <h3 align="left">Connect with me:</h3>
 <p align="left">
+<a href="https://linkedin.com/in/https://www.linkedin.com/in/kiki-dwi-prasetyo-49b059254/" target="blank"><img align="center" src="https://raw.githubusercontent.com/rahuldkjain/github-profile-readme-generator/master/src/images/icons/Social/linked-in-alt.svg" alt="https://www.linkedin.com/in/kiki-dwi-prasetyo-49b059254/" height="30" width="40" /></a>
 </p>
 
 <h3 align="left">Languages and Tools:</h3>
@@ -37,3 +36,4 @@ Here are some ideas to get you started:
 <p>&nbsp;<img align="center" src="https://github-readme-stats.vercel.app/api?username=kikidwi&show_icons=true&locale=en" alt="kikidwi" /></p>
 
 <p><img align="center" src="https://github-readme-streak-stats.herokuapp.com/?user=kikidwi&" alt="kikidwi" /></p>
+
