@@ -1,0 +1,52 @@
+<svg width="850" height="450" viewBox="0 0 850 450" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .bg { fill: #10141b; } 
+    .text { fill: #e5e5e5; font-family: 'Courier New', Courier, monospace; font-size: 15px; }
+    .ascii { fill: #00A5FF; font-family: 'Courier New', Courier, monospace; font-size: 15px; font-weight: bold; }
+    .user { fill: #58a6ff; font-weight: bold; }
+    .sep { fill: #8b949e; }
+    .key { fill: #d2a8ff; } 
+    .val { fill: #a5d6ff; } 
+    .val-yellow { fill: #f2cc60; font-weight: bold; }
+    .val-green { fill: #3fb950; font-weight: bold; }
+    .val-red { fill: #f85149; font-weight: bold; }
+    .category { fill: #ff7b72; font-weight: bold; }
+  </style>
+
+  <rect class="bg" width="850" height="450" rx="8"/>
+
+  <g transform="translate(30, 40)">
+    <!-- ASCII Art -->
+    <text class="ascii" y="0" xml:space="preserve">
+      <tspan x="0" dy="1.2em">██╗  ██╗██╗██╗  ██╗██╗</tspan>
+      <tspan x="0" dy="1.2em">██║ ██╔╝██║██║ ██╔╝██║</tspan>
+      <tspan x="0" dy="1.2em">█████╔╝ ██║█████╔╝ ██║</tspan>
+      <tspan x="0" dy="1.2em">██╔═██╗ ██║██╔═██╗ ██║</tspan>
+      <tspan x="0" dy="1.2em">██║  ██╗██║██║  ██╗██║</tspan>
+      <tspan x="0" dy="1.2em">╚═╝  ╚═╝╚═╝╚═╝  ╚═╝╚═╝</tspan>
+    </text>
+
+    <!-- Content -->
+    <text class="text" x="250" y="0" xml:space="preserve">
+      <tspan x="250" dy="1.2em"><tspan class="user">kikidwi</tspan><tspan class="sep">@</tspan><tspan class="user">github</tspan> <tspan class="sep">-------------------------</tspan></tspan>
+      <tspan x="250" dy="1.2em"><tspan class="key">OS:</tspan> ...................... Developer OS</tspan>
+      <tspan x="250" dy="1.2em"><tspan class="key">Uptime:</tspan> .................. {{ age_data }}</tspan>
+      <tspan x="250" dy="1.2em"><tspan class="key">Host:</tspan> .................... Web Developer</tspan>
+      <tspan x="250" dy="1.2em"><tspan class="key">Kernel:</tspan> .................. Full Stack</tspan>
+      <tspan x="250" dy="1.2em"><tspan class="key">IDE:</tspan> ..................... VS Code, PyCharm</tspan>
+      
+      <tspan x="250" dy="2.0em"><tspan class="key">Languages.Programming:</tspan> ... Python, JavaScript, Laravel, Kotlin</tspan>
+      <tspan x="250" dy="1.2em"><tspan class="key">Languages.Human:</tspan> ......... Indonesian, English</tspan>
+      
+      <tspan x="250" dy="2.0em"><tspan class="sep">- </tspan><tspan class="category">Contact </tspan><tspan class="sep">-------------------------------------</tspan></tspan>
+      <tspan x="250" dy="1.2em"><tspan class="key">Instagram:</tspan> ............... <tspan class="val">@kikii.dwp</tspan></tspan>
+      <tspan x="250" dy="1.2em"><tspan class="key">GitHub:</tspan> .................. <tspan class="val">kikidwi</tspan></tspan>
+      
+      <tspan x="250" dy="2.0em"><tspan class="sep">- </tspan><tspan class="category">GitHub Stats </tspan><tspan class="sep">--------------------------------</tspan></tspan>
+      <tspan x="250" dy="1.2em"><tspan class="key">Repos:</tspan> <tspan class="val-yellow">{{ repo_data }}</tspan> | <tspan class="key">Stars:</tspan> <tspan class="val-yellow">{{ star_data }}</tspan> | <tspan class="key">Followers:</tspan> <tspan class="val-yellow">{{ follower_data }}</tspan></tspan>
+      <tspan x="250" dy="1.2em"><tspan class="key">Commits (this yr):</tspan> ....... <tspan class="val-yellow">{{ commit_data }}</tspan></tspan>
+      <tspan x="250" dy="1.2em"><tspan class="key">Lines of Code:</tspan> ........... <tspan class="val-green">+{{ loc_add }}</tspan> <tspan class="sep">|</tspan> <tspan class="val-red">-{{ loc_del }}</tspan></tspan>
+      <tspan x="250" dy="1.2em"><tspan class="key">Net Lines:</tspan> ............... <tspan class="val-green">{{ loc_net }}</tspan></tspan>
+    </text>
+  </g>
+</svg>
