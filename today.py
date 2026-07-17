@@ -221,13 +221,13 @@ def svg_overwrite(filename, values):
     root = tree.getroot()
 
     # Update age/uptime
-    justify_format(root, 'age_data', values['age_data'], 'uptime_dots', 16)
+    justify_format(root, 'age_data', values['age_data'], 'uptime_dots', 17)
 
     # Update GitHub Stats
     justify_format(root, 'repo_data', values['repo_data'], 'repo_dots', 5)
     justify_format(root, 'contrib_data', values['contrib_data'])
     justify_format(root, 'star_data', values['star_data'], 'star_dots', 9)
-    justify_format(root, 'commit_data', values['commit_data'], 'commit_dots', 13)
+    justify_format(root, 'commit_data', values['commit_data'], 'commit_dots', 16)
     justify_format(root, 'follower_data', values['follower_data'], 'follower_dots', 5)
 
     # Update Lines of Code
