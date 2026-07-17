@@ -40,7 +40,7 @@ text, tspan {white-space: pre;}
 </text>
 
 <text x="430" y="30" fill="#24292f">
-<tspan x="430" y="30" class="key">kikidwi</tspan><tspan>@</tspan><tspan class="key">github</tspan></tspan>
+<tspan x="430" y="30" class="key">kikidwi</tspan><tspan>@</tspan><tspan class="key">github</tspan>
 <tspan x="430" y="50" class="cc">--------------------------------------</tspan>
 <tspan x="430" y="70"><tspan class="key">OS</tspan><tspan class="cc">:</tspan> <tspan class="cc" id="age_dots">....................</tspan> <tspan class="value">Developer OS</tspan></tspan>
 <tspan x="430" y="90"><tspan class="key">Uptime</tspan><tspan class="cc">:</tspan> <tspan class="cc" id="uptime_dots">................</tspan> <tspan class="value" id="age_data">22 years, 7 months, 18 days</tspan></tspan>
