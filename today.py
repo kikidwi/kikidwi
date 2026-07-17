@@ -7,6 +7,9 @@ lines of code) for a user and stamps them into two SVG templates
 (light_mode.svg / dark_mode.svg) so they can be embedded in a GitHub
 profile README and refreshed automatically by GitHub Actions.
 
+Uses lxml.etree to parse and update SVG elements by their id attributes,
+similar to Andrew6rant's approach but adapted for kikidwi's profile.
+
 Env vars required (set as repo secrets, injected by the workflow):
     ACCESS_TOKEN   -> a GitHub Personal Access Token (repo + read:user scopes)
     USER_NAME      -> the GitHub username to report on   (e.g. "kikidwi")
@@ -14,11 +17,10 @@ Env vars required (set as repo secrets, injected by the workflow):
 """
 
 import os
-import subprocess
-import shutil
-import tempfile
 import datetime
 import requests
+from lxml import etree
+from dateutil import relativedelta
 
 GITHUB_API = "https://api.github.com/graphql"
 USER_NAME = os.environ.get("USER_NAME", "kikidwi")
@@ -42,25 +44,22 @@ def graphql(query, variables=None):
     return data["data"]
 
 
-def calc_age(birthday_str):
-    """Returns age as a human string: '23 years, 7 months, 3 days'."""
-    born = datetime.date.fromisoformat(birthday_str)
-    today = datetime.date.today()
+def format_plural(unit):
+    """Returns 's' if unit != 1, else ''."""
+    return 's' if unit != 1 else ''
 
-    years = today.year - born.year
-    months = today.month - born.month
-    days = today.day - born.day
 
-    if days < 0:
-        months -= 1
-        # days in previous month
-        prev_month_last_day = (today.replace(day=1) - datetime.timedelta(days=1)).day
-        days += prev_month_last_day
-    if months < 0:
-        years -= 1
-        months += 12
-
-    return f"{years} years, {months} months, {days} days"
+def daily_readme(birthday_str):
+    """
+    Returns the length of time since birth as a human string.
+    e.g. '23 years, 7 months, 3 days'
+    """
+    born = datetime.datetime.strptime(birthday_str, "%Y-%m-%d")
+    diff = relativedelta.relativedelta(datetime.datetime.today(), born)
+    return '{} {}, {} {}, {} {}'.format(
+        diff.years, 'year' + format_plural(diff.years),
+        diff.months, 'month' + format_plural(diff.months),
+        diff.days, 'day' + format_plural(diff.days))
 
 
 def fetch_profile_stats():
@@ -87,10 +86,28 @@ def fetch_profile_stats():
         "repos": user["repositories"]["totalCount"],
         "followers": user["followers"]["totalCount"],
         "stars": total_stars,
-        "commits_this_year": user["contributionsCollection"]["contributionCalendar"][
+        "commits": user["contributionsCollection"]["contributionCalendar"][
             "totalContributions"
         ],
     }
+
+
+def fetch_contributed_repo_count():
+    """Count repos user has contributed to (COLLABORATOR + ORG_MEMBER)."""
+    query = """
+    query($login: String!) {
+      user(login: $login) {
+        repositoriesContributedTo(first: 1, contributionTypes: [COMMIT, PULL_REQUEST, ISSUE]) {
+          totalCount
+        }
+      }
+    }
+    """
+    try:
+        data = graphql(query, {"login": USER_NAME})
+        return data["user"]["repositoriesContributedTo"]["totalCount"]
+    except Exception:
+        return 0
 
 
 def fetch_repo_names():
@@ -119,10 +136,13 @@ def fetch_repo_names():
 
 def count_lines_of_code(repo_names):
     """
-    Clones each repo (bare, shallow-history off) into a temp dir and sums
+    Clones each repo (bare) into a temp dir and sums
     insertions/deletions authored by USER_NAME via `git log --numstat`.
-    Skips repos that fail to clone (private/renamed/etc).
     """
+    import subprocess
+    import shutil
+    import tempfile
+
     total_add, total_del = 0, 0
     with tempfile.TemporaryDirectory() as tmp:
         for name in repo_names:
@@ -153,7 +173,6 @@ def count_lines_of_code(repo_names):
                         total_add += int(parts[0])
                         total_del += int(parts[1])
             except Exception:
-                # Repo unreachable / empty / binary-only diff -> skip quietly
                 continue
             finally:
                 shutil.rmtree(dest, ignore_errors=True)
@@ -161,21 +180,72 @@ def count_lines_of_code(repo_names):
 
 
 def fmt(n):
+    """Format number with comma separators."""
     return f"{n:,}"
 
 
-def render_svg(template_path, output_path, values):
-    with open(template_path, "r", encoding="utf-8") as f:
-        svg = f.read()
-    for key, val in values.items():
-        svg = svg.replace("{{ " + key + " }}", str(val))
-    with open(output_path, "w", encoding="utf-8") as f:
-        f.write(svg)
+def find_element_by_id(root, element_id):
+    """Find an SVG element by its id attribute using XPath."""
+    ns = {'svg': 'http://www.w3.org/2000/svg'}
+    results = root.xpath(f'//*[@id="{element_id}"]', namespaces=ns)
+    if results:
+        return results[0]
+    return None
+
+
+def justify_format(root, element_id, new_text, dots_id=None, dots_length=0):
+    """
+    Update the text of an SVG element identified by element_id.
+    Optionally adjust the dots padding in a sibling element.
+    """
+    new_text = str(new_text)
+    element = find_element_by_id(root, element_id)
+    if element is not None:
+        element.text = new_text
+
+    # Adjust dot-padding if dots_id is provided
+    if dots_id and dots_length > 0:
+        dots_element = find_element_by_id(root, dots_id)
+        if dots_element is not None:
+            just_len = max(1, dots_length - len(new_text))
+            dots_element.text = '.' * just_len
+
+
+def svg_overwrite(filename, values):
+    """
+    Parse SVG file and update elements with live stats data.
+    Uses lxml to find elements by id and replace their text content.
+    """
+    parser = etree.XMLParser(remove_blank_text=False)
+    tree = etree.parse(filename, parser)
+    root = tree.getroot()
+
+    # Update age/uptime
+    justify_format(root, 'age_data', values['age_data'], 'uptime_dots', 16)
+
+    # Update GitHub Stats
+    justify_format(root, 'repo_data', values['repo_data'], 'repo_dots', 5)
+    justify_format(root, 'contrib_data', values['contrib_data'])
+    justify_format(root, 'star_data', values['star_data'], 'star_dots', 9)
+    justify_format(root, 'commit_data', values['commit_data'], 'commit_dots', 13)
+    justify_format(root, 'follower_data', values['follower_data'], 'follower_dots', 5)
+
+    # Update Lines of Code
+    justify_format(root, 'loc_data', values['loc_net'])
+    justify_format(root, 'loc_add', values['loc_add'])
+    justify_format(root, 'loc_del', values['loc_del'])
+
+    tree.write(filename, encoding='UTF-8', xml_declaration=True)
 
 
 def main():
+    import shutil
+
+    age = daily_readme(BIRTHDAY)
     stats = fetch_profile_stats()
-    age = calc_age(BIRTHDAY)
+
+    # Get contributed repos count
+    contrib_count = fetch_contributed_repo_count()
 
     do_loc = os.environ.get("SKIP_LOC", "false").lower() != "true"
     added, deleted = (0, 0)
@@ -189,19 +259,25 @@ def main():
     values = {
         "age_data": age,
         "repo_data": fmt(stats["repos"]),
+        "contrib_data": fmt(contrib_count),
         "star_data": fmt(stats["stars"]),
         "follower_data": fmt(stats["followers"]),
-        "commit_data": fmt(stats["commits_this_year"]),
+        "commit_data": fmt(stats["commits"]),
         "loc_add": fmt(added),
         "loc_del": fmt(deleted),
         "loc_net": fmt(added - deleted),
     }
 
-    render_svg("templates/light_mode.svg", "light_mode.svg", values)
-    render_svg("templates/dark_mode.svg", "dark_mode.svg", values)
+    # Copy templates to root, then overwrite with live data
+    shutil.copy("templates/dark_mode.svg", "dark_mode.svg")
+    shutil.copy("templates/light_mode.svg", "light_mode.svg")
+
+    svg_overwrite("dark_mode.svg", values)
+    svg_overwrite("light_mode.svg", values)
 
     print("Stats updated:", values)
 
 
 if __name__ == "__main__":
     main()
+
